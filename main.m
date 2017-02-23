@@ -1,65 +1,82 @@
 clc;clear;clf;close all;
 % Clean up
 
-filelist = dir('images/*.jpg');
+filelist = dir('images/Strip*.jpg');
 m = 4;
 n = length(filelist);
 for i=1:n
     %% Load the original image
     imname = filelist(i).name;
 	im = imread(['images/' imname], 'jpg');
-    figure
-    subplot(1,2,1);
-    title(sprintf('file %s', imname));
-    imshow(im);
-    
-    %% Run FFT on the image
-    F = fft2(im2double(im));
-    
-    % Define parameters required to create bandpass filter M
-    height = size(im,1);
-    width = size(im,2);
-    r1 = height/2 * 0.01;
-    r2 = height/2 * 0.04;
-    [X,Y] = meshgrid(1:width, 1:height);
-
-%%%%%%%%%%%% Circular bandpass filter %%%%%%%%%%%%
-    % Create a logical matrix M
-    % True  (1) if (x, y) in between r1 and r2
-    % False (0) otherwise
-    M = sqrt((X-width/2).^2 + (Y-height/2).^2) > r1 & sqrt((X-width/2).^2 + (Y-height/2).^2) < r2;
    
-    % Convert the logical matrix to double matrix
-    M = double(M);
-%%%%%%%%%%%% Circular bandpass filter %%%%%%%%%%%%
-
-
-%%%%%%%%%%%% Butterworth bandpass filter %%%%%%%%%%%%
-%     p = 8;
-%     r = sqrt((X-width/2).^2 + (Y-height/2).^2);
-% 
-%     M = 1./(1+(r1./r).^(2*p))/2 + ...
-%         1./(1+(r./r2).^(2*p))/2;
-%%%%%%%%%%%% Butterworth bandpass filter %%%%%%%%%%%%
-
-    % Apply filter M to FFT
-    C = M.*fftshift(F);
-
-    %% Run inverse FFT on the image
-    I = ifft2(fftshift(C));
-    I = im2uint8(I);
-%     % Plot filtered image from IFFT
-%     figure
-%     imshow(I);
-%     title(sprintf('r_1 = %.2f r_2 = %.2f', r1, r2));
     
-    % Threshold image to filter out unneeded outlines
-    threshold = 10;
-    I(I >= threshold) = 255;
-    I(I < threshold) = 0;
+    figure
+    subplot(3,1,1);
+    imshow(im);
+    title(sprintf('Original file %s', imname));
     
-    % Plot filtered image from IFFT
-    subplot(1,2,2);
-    imshow(I);
-    title(sprintf('r_1 = %.2f r_2 = %.2f threshold = %d', r1, r2, threshold));
+    G = rgb2gray(im);
+    G = medfilt2(G);
+    
+    subplot(3,1,2);
+    [counts,binLocations] = imhist(G);
+    stem(binLocations, counts);
+    title('Histogram of gray scale version image');
+    
+%     % TO DO: get threshold from between peaks
+%     first_peak = 0;
+%     for ind = 1:256
+%         if counts(ind) > first_peak
+%             first_peak = counts(ind);
+%         end
+%     end
+    
+    threshold = 30; %(first_peak + second_peak))/2;
+    T = G;
+    T(T > threshold) = 255;
+    T(T <= threshold) = 0;
+    subplot(3,1,3);
+    imshow(T);
+    title(sprintf('Filtered image with threshold = %d', threshold));
+
+    
+    height = size(T,1);
+    rand_y = randperm(height, 3);
+    thickness_threshold = 2;
+    max_number = 10; % max number of songs
+    indexes = zeros(3, max_number);
+    
+    for n = 1:numel(rand_y)
+        y = rand_y(n);
+        count = 0;
+        thickness = 0;
+        index = 1;
+        for x = 1:size(T, 2)-1
+            
+            % reset thickness count if change detected
+            if (T(y,x) ~= T(y, x+1))
+                % if thickness count exceeds threshold, add the index of change
+                % to array
+                if thickness > thickness_threshold 
+                    count = count + 1;
+                    indexes(n, count) = index;                    
+                end
+                
+                index = x;
+                %lengths(y, count) = thickness;
+                thickness = 0;
+            end
+            
+            
+            thickness = thickness + 1;
+        end
+        
+        ind = indexes(n,:);
+        g=sprintf('%d, ', ind(ind>0));
+        %fprintf('Answer: %s\n', g);
+        subplot(3,1,3);
+        text(0, height+25*n, sprintf('Detected positions: %s', g));
+    end
+    
+
 end
