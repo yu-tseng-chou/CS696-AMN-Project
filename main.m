@@ -47,9 +47,10 @@ for i=1:n
     indexes = zeros(3, max_number);
     
     subplot(4,1,4);
-    decomp = MedianDecomposition(T,3);
+    filterWidth=3;
+    decomp = MedianDecomposition(T,filterWidth);
     imshow(repmat(decomp,size(T,1),1));
-    title('After median decomposition of width=3');
+    title(sprintf('After median decomposition of width = %d', filterWidth));
     
 %     for n = 1:numel(rand_y)
 %         y = rand_y(n);
