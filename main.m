@@ -4,6 +4,7 @@ clc;clear;clf;close all;
 % Loading the images
 filelist = dir('images/Strip*.jpg');
 n = length(filelist);
+nSubplots = 4;
 
 for i=1:n
     %% Load the original image
@@ -11,7 +12,7 @@ for i=1:n
 	im = imread(['images/' imname], 'jpg');
    
     figure
-    subplot(4,1,1);
+    subplot(nSubplots,1,1);
     imshow(im);
     title(sprintf('Original file %s', imname));
     
@@ -20,7 +21,7 @@ for i=1:n
     G = medfilt2(G);
     
     %% Get the optimal threshold for image filtering
-    subplot(4,1,2);
+    subplot(nSubplots,1,2);
     [counts,binLocations] = imhist(G);
     stem(binLocations, counts);
     title('Histogram of gray scale version image');
@@ -64,12 +65,12 @@ for i=1:n
     T = G;
     T(T > threshold) = 255;
     T(T <= threshold) = 0;
-    subplot(4,1,3);
+    subplot(nSubplots,1,3);
     imshow(T);
     title(sprintf('Filtered image with threshold = %d', threshold));
     
     %% 
-    subplot(4,1,4);
+    subplot(nSubplots,1,4);
     filterWidth=3;
     decomp = MedianDecomposition(T,filterWidth);
     imshow(repmat(decomp,size(T,1),1));
