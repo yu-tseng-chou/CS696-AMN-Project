@@ -2,7 +2,7 @@
 clc;clear;clf;close all;
 
 % Loading the images
-filelist = dir('images/*.jpg');
+filelist = dir('images/ChartBusterSide2_HighPass_CutLeft_Trimmed.jpg');
 n = length(filelist);
 numSubplotRows = 3;
 numSubplotCols = 1;
@@ -38,13 +38,10 @@ for i=1:n
     imshow(stretchedDecmop);
     title(sprintf('After median decomposition of width = %d', filterWidth));
     
-    merged = [T(:,2:end-1); stretchedDecmop];
-    imwrite(merged, [imname(1:end-4) '_MedianFilter.jpg']);
-    
     %% Extract song length information
-%     height = size(T,1);
-%     song_lengths = SongLengthsExtraction(decomp);
-%     g = sprintf('%d, ', song_lengths);
-%     g = g(1:size(g,2)-2); % Trim off trailing comma
-%     text(0, height+25, sprintf('%d Songs detected. Lengths: %s', size(song_lengths, 2), g));
+    height = size(T,1);
+    song_lengths = SongLengthsExtraction(singleRowDecomp);
+    g = sprintf('%d, ', song_lengths);
+    g = g(1:size(g,2)-2); % Trim off trailing comma
+    text(0, height+35, g);
 end

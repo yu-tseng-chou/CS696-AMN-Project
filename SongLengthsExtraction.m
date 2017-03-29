@@ -1,44 +1,31 @@
 function song_lengths = SongLengthsExtraction(decomp)
-    black_threshold = 30;
-    black_count = 0;
-    
-    max_number = 20;
-    song_count = 0;
-    song_length = 0;
-    song_lengths = zeros(1, max_number);
+% Return vector with number of grooves in each song.
+%   decomp - a 1-D array of black/white (median filtered image)
 
-    start_record = 0;
+    % set minimum width to detect change of song number 
+    threshold       = 15;
+    song_lengths    = [];
     
-    for j = 1:size(decomp, 2)
-        if (decomp(1,j) == 0)
-            black_count = black_count + 1;
-            if (black_count >= black_threshold)
-                start_record = 1;
-                black_count = 0;
-            end
-        end
+    % [00011100110011000000...] decomp
+    % [00111001100110000000...] shifted_decomp (<<1)
+    % [00100001000100000000...] 
+    %    ^    ^   ^             indices -> detected
+    shifted_decomp  = [decomp(2:end) 0];
+    detected        = find(decomp == 0 & shifted_decomp == 255);
+    groove_count    = 0;
+    
+    % count number of grooves per song
+    for n = 1: size(detected, 2)-1
+        groove_count     = groove_count + 1;
         
-        if (start_record == 1)
-            if (decomp(1, j) == 255)
-                if (decomp(1,j-1) == 0)
-                    song_length = 0;
-                end
-                song_length = song_length + 1;
-            elseif (decomp(1, j) == 0)
-                black_count = black_count + 1;
-                
-                if (decomp(1, j-1) == 255)
-                    if (black_count < black_threshold ...
-                        && song_length > black_threshold)
-                        song_count = song_count + 1;
-                        song_lengths(song_count) = song_length;
-                    end
-                    
-                    black_count = 0;
-                end
-            end
+        distance_between = detected(n+1) - detected(n);
+        if  distance_between > threshold
+            % found end of song
+            song_lengths(numel(song_lengths)+1) = groove_count;
+            groove_count = 0;
         end
     end
     
-    song_lengths = song_lengths(song_lengths > 0);
+    % include final song
+    song_lengths(numel(song_lengths)+1) = groove_count;
 end
