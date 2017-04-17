@@ -12,18 +12,18 @@ function song_lengths = SongLengthsExtraction(decomp)
     %    ^    ^   ^             indices -> detected
     shifted_decomp  = [decomp(2:end) 0];
     detected        = find(decomp == 0 & shifted_decomp == 255);
-    groove_count    = 0;
+    groove_count    = 1;
     
     % count number of grooves per song
     for n = 1: size(detected, 2)-1
-        groove_count     = groove_count + 1;
-        
         distance_between = detected(n+1) - detected(n);
         if  distance_between > threshold
             % found end of song
             song_lengths(numel(song_lengths)+1) = groove_count;
-            groove_count = 0;
+            groove_count        = 0;
         end
+        
+        groove_count     = groove_count + 1;
     end
     
     % include final song

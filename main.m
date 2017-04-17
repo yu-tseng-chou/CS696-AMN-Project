@@ -2,7 +2,7 @@
 clc;clear;clf;close all;
 
 % Loading the images
-filelist = dir('images/ChartBusterSide2_HighPass_CutLeft_Trimmed.jpg');
+filelist = [dir('images/*.jpg');dir('images/*.png')];
 n = length(filelist);
 numSubplotRows = 3;
 numSubplotCols = 1;
@@ -12,12 +12,12 @@ for i=1:n
     
     %% Load the original image
     imname = filelist(i).name;
-	im = imread(['images/' imname], 'jpg');
+	im = imread(['images/' imname]);
    
     figure
     autoSubplotter();
     imshow(im);
-    title(sprintf('Original file %s', imname));
+    title(sprintf('Original file %s', strrep(imname, '_', '\_')));
     
     %% Filter image with a threshold so only black and white left
 %     threshold = ComputeThreshold(counts);
@@ -31,7 +31,7 @@ for i=1:n
     
     %% Remove noise with Median Filter
     autoSubplotter();
-    filterWidth=3;
+    filterWidth = 3;
     singleRowDecomp = MedianDecomposition(T,filterWidth);
     % Vertically stretch decomposed row to make viewing easier
     stretchedDecmop = repmat(singleRowDecomp,size(T,1),1);
