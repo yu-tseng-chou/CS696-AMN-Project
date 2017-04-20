@@ -21,7 +21,8 @@ function song_lengths = SongLengthsExtraction(decomp)
         distance_between = detected(n+1) - detected(n);
         
         % silent groove in song separator
-        if groove_count == 1 && distance_between > min_threshold
+        if groove_count == 1 && numel(song_lengths) > 0 ...
+                && distance_between > min_threshold
             song_lengths(numel(song_lengths)) = ...
                 song_lengths(numel(song_lengths)) + 1;
             groove_count    = 0;
