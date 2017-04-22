@@ -1,29 +1,32 @@
 function groove_counts = GetGrooveCounts(imname)
 
-    numSubplotRows = 3;
+    numSubplotRows = 4;
     numSubplotCols = 1;
     autoSubplotter = MakeAutoSubplot(numSubplotRows, numSubplotCols);
     
     %% Load the original image
 	im = imread(imname);
-   
     figure
     autoSubplotter();
     imshow(im);
-    title(sprintf('Original file %s', strrep(imname, '_', '\_')));
+    title('Original Cropped Image');
     
     %% Filter the grayscale image with a high pass kernel
     G = rgb2gray(im);
     kernel = [-1 -1 -1; -1 8 -1; -1 -1 -1]/9;
-    T = imfilter(single(G), kernel);
+    H = imfilter(single(G), kernel);
+    autoSubplotter();
+    imshow(H);
+    title('High Pass Filter, k = [-1 -1 -1; -1  8 -1; -1 -1 -1]/9');
     
     %% Filter image with a threshold so only black and white left
     threshold = 50;
+    T = im2uint8(H);
     T(T > threshold) = 255;
     T(T <= threshold) = 0;
     autoSubplotter();
     imshow(T);
-    title(sprintf('Filtered image with threshold = %d', threshold));
+    title(sprintf('Threshold Filter, \\theta = %d', threshold));
     
     %% Remove noise with Median Filter
     autoSubplotter();
@@ -32,7 +35,7 @@ function groove_counts = GetGrooveCounts(imname)
     % Vertically stretch decomposed row to make viewing easier
     stretchedDecmop = repmat(singleRowDecomp,size(T,1),1);
     imshow(stretchedDecmop);
-    title(sprintf('After median decomposition of width = %d', filterWidth));
+    title(sprintf('Median Filter, \\omega = %d', filterWidth));
     
     %% Extract song length information
     height = size(T,1);
@@ -44,5 +47,5 @@ function groove_counts = GetGrooveCounts(imname)
     %% Display results
     g = sprintf('%d, ', groove_counts);
     g = g(1:size(g,2)-2); % Trim off trailing comma
-    text(0, height+35, g);
+    text(0, height+50, ['Groove Counts: ' g]);
 end
