@@ -6,7 +6,8 @@ function song_lengths = SongLengthsExtraction(decomp)
     min_threshold   = 10;   % minimum width to detect final silent groove
     song_lengths    = [];
     
-    %  0 = black, 1 = white
+    % find transitions from black to white
+    % 0 = black, 1 = white
     % [00011100110011000000...] decomp
     % [00111001100110000000...] shifted_decomp (<<1)
     % [00100001000100000000...] 
